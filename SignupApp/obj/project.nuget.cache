@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "DOge6V4sveQ=",
+  "success": true,
+  "projectFilePath": "/workspaces/BlazorSignUp/SignupApp/SignupApp.csproj",
+  "expectedPackageFiles": [
+    "/home/codespace/.nuget/packages/microsoft.aspnetcore.app.internal.assets/10.0.4/microsoft.aspnetcore.app.internal.assets.10.0.4.nupkg.sha512"
+  ],
+  "logs": []
+}
