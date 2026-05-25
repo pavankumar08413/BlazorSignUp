@@ -1,0 +1,113 @@
+
+@page "/signup"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.JSInterop
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+<h3>Sign Up</h3>
+
+<EditForm Model="@signupModel"
+          FormName="SignupForm"
+          OnValidSubmit="HandleValidSubmit"
+          OnInvalidSubmit="HandleInvalidSubmit"
+>
+    <DataAnnotationsValidator />
+
+    <div class="form-group">
+        <label for="firstname">First Name</label>
+        <InputText id="firstname" @bind-Value="signupModel.FirstName" class="form-control" />
+        <ValidationMessage For="@(() => signupModel.FirstName)" />
+    </div>
+
+    <div class="form-group">
+        <label for="lastname">Last Name</label>
+        <InputText id="lastname" @bind-Value="signupModel.LastName" class="form-control" />
+        <ValidationMessage For="@(() => signupModel.LastName)" />
+    </div>
+
+    <div class="form-group">
+        <label for="age">Age</label>
+        <InputSelect id="age" @bind-Value="signupModel.Age" class="form-control">
+            @for (int i = 18; i <= 50; i++)
+            {
+                <option value="@i">@i</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="@(() => signupModel.Age)" />
+    </div>
+
+    <div class="form-group">
+        <label for="email">Email</label>
+        <InputText id="email" @bind-Value="signupModel.Email" class="form-control" type="email" />
+        <ValidationMessage For="@(() => signupModel.Email)" />
+    </div>
+
+    <div class="form-group">
+        <label for="dob">Date of Birth</label>
+        <InputDate id="dob" @bind-Value="signupModel.DateOfBirth" class="form-control" />
+        <ValidationMessage For="@(() => signupModel.DateOfBirth)" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Sign Up</button>
+</EditForm>
+
+@code {
+    private SignupModel signupModel = new SignupModel();
+
+    private void HandleValidSubmit()
+    {
+        // Handle form submission logic here, e.g., save to database or API call
+        Navigation.NavigateTo("/");
+    }
+
+    private void HandleInvalidSubmit()
+    {
+        // Handle form submission logic here, e.g., save to database or API call
+        
+    }
+
+    
+    public class SignupModel : IValidatableObject
+    {
+        [Required(ErrorMessage = "First name is required")]
+        [MinLength(2, ErrorMessage = "First name must be at least 2 characters")]
+        public string FirstName { get; set; }
+
+        [Required(ErrorMessage = "Last name is required")]
+        public string LastName { get; set; }
+
+        [Required(ErrorMessage = "Please select age")]
+        [Range(18, 50, ErrorMessage = "Age must be between 18 and 50")]
+        public int? Age { get; set; }
+
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Invalid email address")]
+        public string Email { get; set; }
+
+        [Required(ErrorMessage = "Date of birth is required")]
+        public DateTime? DateOfBirth { get; set; }
+
+        // ✅ Cross-field client-side validation
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (Age.HasValue && DateOfBirth.HasValue)
+            {
+                var today = DateTime.Today;
+                var calculatedAge = today.Year - DateOfBirth.Value.Year;
+                if (DateOfBirth.Value.Date > today.AddYears(-calculatedAge))
+                    calculatedAge--;
+
+                if (calculatedAge != Age.Value)
+                {
+                    yield return new ValidationResult(
+                        "Age does not match Date of Birth",
+                        new[] { nameof(DateOfBirth) }
+                    );
+                }
+            }
+        }
+    }
+
+}
